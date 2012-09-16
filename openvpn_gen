@@ -3,7 +3,7 @@ import os, sys
 import zipfile
 
 def help():
-    print """Usage: openvpn_gen [-w, -m, -l] [options] client
+    print """Usage: openvpn_gen [-w, -m, -l] client
     --help, -h\tDisplay this help message
     -w\tCreate a Windows bundle
     -m\tCreate a Mac bundle

@@ -23,7 +23,7 @@ Included is a server configuration you can use to go along with the clients. It 
 #Usage#
 
     openvpn_gen -h
-    Usage: openvpn_gen [-w, -m, -l] [options] client
+    Usage: openvpn_gen [-w, -m, -l] client
         --help, -h  Display this help message
         -w  Create a Windows bundle
         -m  Create a Mac bundle
