@@ -1,0 +1,189 @@
+#!/usr/bin/python
+import os, sys
+import zipfile
+
+def help():
+    print """Usage: openvpn_gen [-w, -m, -l] [options] client
+    --help, -h\tDisplay this help message
+    -w\tCreate a Windows bundle
+    -m\tCreate a Mac bundle
+    -l\tCreate a Linux bundle
+
+    client is the name of the key you wish to create. It is also the name you use to revoke a client"""
+    confhelp()
+
+def confhelp():
+    print """You must create a settings file at /etc/openvpn/clients/server.conf in the following format:
+
+server=server
+port=port
+proto=proto
+
+port is optional and will default to 1194. proto may be tcp or udp, is optional and will default to udp.
+server is mandatory and may be a hostname or ip address
+"""
+    sys.exit(0)
+
+# check parameters
+try:
+    if sys.argv[1] in ['-h', '--help']:
+        help()
+    if sys.argv[1] not in ['-w', '-m', '-l']:
+        help()
+    client = sys.argv[2]
+except IndexError:
+    help()
+
+# make sure we are root
+if os.geteuid() != 0:
+    print "You must run this utility as root!"
+    sys.exit(0)
+
+# make sure config exists
+if not os.path.isfile('/etc/openvpn/clients/server.conf'):
+    confhelp()
+# get all settings from file
+else:
+    try:
+        print "Reading Settings"
+        f = open('/etc/openvpn/clients/server.conf')
+        config = [y.split('=') for y in f.read().strip().split('\n')]
+        f.close()
+        settings = dict()
+        for setting in config:
+            settings[setting[0]] = setting[1]
+        if 'server' not in settings:
+            confhelp()
+        else:
+            server = settings['server']
+        if 'port' in settings:
+            port = settings['port']
+        else:
+            port = '1194'
+        if 'proto' in settings:
+            proto = settings['proto']
+        else:
+            proto = 'udp'
+    except:
+        print "Error parsing configuration file"
+        confhelp()
+
+print "Using server: {0}, port: {1}, proto: {2}".format(server,port,proto)
+    
+# check if files already exists
+print "Checking for previous certificates"
+keycheck = os.path.isfile('/etc/openvpn/easy-rsa/keys/{0}.key'.format(client))
+certcheck = os.path.isfile('/etc/openvpn/easy-rsa/keys/{0}.crt'.format(client))
+
+# if not create them
+if not keycheck or not certcheck:
+    print "Not found. Creating files"
+    os.system('cd /etc/openvpn/easy-rsa && . ./vars && ./pkitool {0}'.format(client))
+
+    keycheck = os.path.isfile('/etc/openvpn/easy-rsa/keys/{0}.key'.format(client))
+    certcheck = os.path.isfile('/etc/openvpn/easy-rsa/keys/{0}.crt'.format(client))
+    # if they still don't exist, quit
+    if not keycheck or not certcheck:
+        print 'Error creating certificate files!'
+else:
+    print "certificates found!"
+
+# set parameters based on OS
+if sys.argv[1] == '-w':
+    print "Creating Windows bundle"
+    filename = '{client}.{os}.zip'.format(client=client,os="win")
+    win = ''
+    lin = ';'
+    if os.path.isfile('/etc/openvpn/clients/win.exe'):
+        clientfile = 'win.exe'
+    else:
+        clientfile = None
+elif sys.argv[1] == '-m':
+    filename = '{client}.{os}.zip'.format(client=client,os="mac")
+    print "Creating Mac bundle"
+    win = lin = ';'
+    if os.path.isfile('/etc/openvpn/clients/mac.dmg'):
+        clientfile = 'mac.dmg'
+    else:
+        clientfile = None
+elif sys.argv[1] == '-l':
+    filename = '{client}.{os}.zip'.format(client=client,os="lin")
+    print "Creating Linux bundle"
+    win = ';'
+    lin = ''
+    clientfile = None
+
+# check if path already exists
+if os.path.isfile(filename):
+    question = raw_input("file {filename} already exists. Overwrite? (Y/n) ".format(filename=filename))
+    if question not in ['', 'y', 'Y', 'yes']:
+        print "Not overwriting. Exiting."
+        sys.exit(0)
+
+
+conf = """##############################################
+# OpenVPN Configuration File                 #
+# for connecting to multi-client server.     #
+# On Windows rename this file so it has an   #
+# .ovpn extension                            #
+##############################################
+
+client
+
+# Needed on Linux
+{lin}script-security 2
+{lin}up /etc/openvpn/update-resolv-conf
+{lin}down /etc/openvpn/update-resolv-conf
+
+# Needed on Windows
+{win}route-method exe
+{win}route-delay 2
+
+# Comment out on Windows
+{notwin}remote-cert-tls server
+
+# network settings
+proto {proto} 
+remote {server} {port} 
+dev tap
+
+# certificates
+ca ca.crt
+cert {client}.crt
+key {client}.key
+tls-auth ta.key 1
+
+# keep trying to resolve name
+resolv-retry infinite
+
+# don't bind to local address
+nobind
+
+# stay connected and inform server on close
+keepalive 10 120
+explicit-exit-notify 2
+
+# keep everything consistent
+persist-key
+persist-tun
+
+comp-lzo # add compression
+
+verb 3 # set verbosity
+""".format(win=win,lin=lin,notwin=';' if win == '' else '',client=client,server=server,port=port,proto=proto)
+
+print "Creating zip file"
+try:
+    zip = zipfile.ZipFile(filename,'w')
+    zip.write('/etc/openvpn/easy-rsa/keys/{0}.key'.format(client),'{client}.key'.format(client=client))
+    zip.write('/etc/openvpn/easy-rsa/keys/{0}.crt'.format(client),'{client}.crt'.format(client=client))
+    zip.write('/etc/openvpn/ta.key','ta.key')
+    zip.write('/etc/openvpn/ca.crt','ca.crt')
+    zip.writestr('client.conf',conf)
+    if clientfile is not None:
+        zip.write('/etc/openvpn/clients/'+clientfile,'client.'+('exe' if win =='' else 'dmg'))
+except:
+    print "Error creating zip file"
+    sys.exit(0)
+
+print "Done. Written to {0}".format(filename)
