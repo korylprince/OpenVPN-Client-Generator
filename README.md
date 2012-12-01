@@ -1,4 +1,4 @@
-A simple utility on top of OpenVPN's easy-rsa that creates a zip bundle of all needed files to connect to OpenVPN server for the 3 Major OSes. A sample server configuration is included.
+A simple utility on top of OpenVPN's easy-rsa that creates a zip bundle of all needed files to connect to OpenVPN server for the 3 Major OSes and Android. A sample server configuration is included.
 
 OpenVPN-Client-Generator
 
@@ -12,7 +12,7 @@ An example of this is https://help.ubuntu.com/community/OpenVPN
 
 Create the directory /etc/openvpn/clients and optionally place inside of it "win.exe" and "mac.dmg", OpenVPN clients for those Operating systems. I suggest using http://openvpn.net/index.php/download/community-downloads.html and http://code.google.com/p/tunnelblick/ .
 
-This utility assumes you will just use your linux distributions version of openvpn, so it doesn't include an option to include a client for linux.
+This utility assumes you will just use your linux or android distributions version of openvpn, so it doesn't include an option to include a client for them.
 
 /etc/openvpn/clients/server.conf must exist with the format given below.
 
@@ -23,11 +23,13 @@ Included is a server configuration you can use to go along with the clients. It 
 #Usage#
 
     openvpn_gen -h
-    Usage: openvpn_gen [-w, -m, -l] client
+
+    Usage: openvpn_gen [-w, -m, -l, -a] client
         --help, -h  Display this help message
         -w  Create a Windows bundle
         -m  Create a Mac bundle
         -l  Create a Linux bundle
+        -a  Create an Android Bundle
 
         client is the name of the key you wish to create. It is also the name you use to revoke a client
     You must create a settings file at /etc/openvpn/clients/server.conf in the following format:
@@ -38,6 +40,7 @@ Included is a server configuration you can use to go along with the clients. It 
 
     port is optional and will default to 1194. proto may be tcp or udp, is optional and will default to udp.
     server is mandatory and may be a hostname or ip address
+
 
 #Caveats#
 

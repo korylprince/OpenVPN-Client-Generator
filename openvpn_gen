@@ -3,11 +3,12 @@ import os, sys
 import zipfile
 
 def help():
-    print """Usage: openvpn_gen [-w, -m, -l] client
+    print """Usage: openvpn_gen [-w, -m, -l, -a] client
     --help, -h\tDisplay this help message
     -w\tCreate a Windows bundle
     -m\tCreate a Mac bundle
     -l\tCreate a Linux bundle
+    -a\tCreate an Android Bundle
 
     client is the name of the key you wish to create. It is also the name you use to revoke a client"""
     confhelp()
@@ -28,7 +29,7 @@ server is mandatory and may be a hostname or ip address
 try:
     if sys.argv[1] in ['-h', '--help']:
         help()
-    if sys.argv[1] not in ['-w', '-m', '-l']:
+    if sys.argv[1] not in ['-w', '-m', '-l','-a']:
         help()
     client = sys.argv[2]
 except IndexError:
@@ -111,6 +112,12 @@ elif sys.argv[1] == '-l':
     print "Creating Linux bundle"
     win = ';'
     lin = ''
+    clientfile = None
+elif sys.argv[1] == '-a':
+    filename = '{client}.{os}.zip'.format(client=client,os="and")
+    print "Creating Android bundle"
+    win = ';'
+    lin = ';'
     clientfile = None
 
 # check if path already exists
