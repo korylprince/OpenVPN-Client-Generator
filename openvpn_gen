@@ -186,7 +186,7 @@ try:
     zip.write('/etc/openvpn/easy-rsa/keys/{0}.crt'.format(client),'{client}.crt'.format(client=client))
     zip.write('/etc/openvpn/ta.key','ta.key')
     zip.write('/etc/openvpn/ca.crt','ca.crt')
-    zip.writestr('client.conf',conf)
+    zip.writestr('client.'+('ovpn' if win =='' else 'conf'),conf)
     if clientfile is not None:
         zip.write('/etc/openvpn/clients/'+clientfile,'client.'+('exe' if win =='' else 'dmg'))
 except:
