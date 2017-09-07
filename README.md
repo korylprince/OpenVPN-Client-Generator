@@ -1,26 +1,24 @@
 A simple utility on top of OpenVPN's easy-rsa that creates a zip bundle of all needed files to connect to OpenVPN server for the 3 Major OSes and Android. A sample server configuration is included.
 
-OpenVPN-Client-Generator
+[OpenVPN-Client-Generator](https://github.com/korylprince/OpenVPN-Client-Generator)
 
-https://github.com/korylprince/OpenVPN-Client-Generator
-
-#Installing#
+# Installing
 
 This assumes you are using the easy-rsa method of creating clients where /etc/openvpn/easy-rsa exists.
 
-An example of this is https://help.ubuntu.com/community/OpenVPN
+[An example of this](https://help.ubuntu.com/community/OpenVPN)
 
-Create the directory /etc/openvpn/clients and optionally place inside of it "win.exe" and "mac.dmg", OpenVPN clients for those Operating systems. I suggest using http://openvpn.net/index.php/download/community-downloads.html and http://code.google.com/p/tunnelblick/ .
+Create the directory /etc/openvpn/clients and optionally place inside of it "win.exe" and "mac.dmg", OpenVPN clients for those Operating systems. I suggest using [OpenVPN](http://openvpn.net/index.php/download/community-downloads.html) and [TunelBlick](http://code.google.com/p/tunnelblick/) .
 
-This utility assumes you will just use your linux or android distributions version of openvpn, so it doesn't include an option to include a client for them.
+This utility assumes you will just use your linux or android distributions version of OpenVPN, so it doesn't include an option to include a client for them.
 
 /etc/openvpn/clients/server.conf must exist with the format given below.
 
-Copy openvpn\_gen to your PATH if you wish to call the utility from anywhere.
+Copy openvpn\_gen to your `PATH` if you wish to call the utility from anywhere.
 
 Included is a server configuration you can use to go along with the clients. It is set up in Bridged mode.
 
-#Usage#
+# Usage
 
     openvpn_gen -h
 
@@ -42,11 +40,11 @@ Included is a server configuration you can use to go along with the clients. It 
     server is mandatory and may be a hostname or ip address
 
 
-#Caveats#
+# Caveats
 
 This works on Ubuntu 12.04 Server. I can't promise that it will work on anything else. I also can't promise it won't mess things up on your system. No reason it would though.
 
-#License#
+# License
 
 Code is Copyright 2012 Kory Prince (korylprince at gmail dot com)
 This code is Public Domain. There is no warranty. Do whatever you want. It'd be nice if you sent me an email telling me someone used it though.
